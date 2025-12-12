@@ -1,0 +1,28 @@
+{
+  "name": "amb-tracker",
+  "version": "1.0.0",
+  "description": "HDFC Bank Average Monthly Balance (AMB) Tracker - Calculate and track your AMB requirements",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "cli": "node index.js",
+    "test": "node index.js ./sample-statement.pdf"
+  },
+  "keywords": [
+    "hdfc",
+    "bank",
+    "amb",
+    "average-monthly-balance",
+    "tracker",
+    "savings-account"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "pdf-parse": "^2.4.5"
+  }
+}
