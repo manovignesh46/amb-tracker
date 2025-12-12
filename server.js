@@ -271,6 +271,15 @@ app.post('/api/analyze', upload.single('pdf'), async (req, res) => {
     }
 });
 
+// Health check endpoint for Render
+app.get('/health', (req, res) => {
+    res.status(200).json({ 
+        status: 'ok', 
+        service: 'AMB Tracker',
+        timestamp: new Date().toISOString() 
+    });
+});
+
 // Serve the main page
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
