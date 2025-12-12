@@ -1,0 +1,40 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 720B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:18-alpine
+#2 DONE 0.5s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 450B done
+#3 DONE 0.0s
+
+#4 [1/6] FROM docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 863B done
+#5 DONE 0.0s
+
+#6 [2/6] WORKDIR /app
+#6 CACHED
+
+#7 [3/6] COPY package*.json ./
+#7 CACHED
+
+#8 [4/6] RUN npm ci --only=production
+#8 CACHED
+
+#9 [5/6] COPY . .
+#9 DONE 0.0s
+
+#10 [6/6] RUN mkdir -p uploads
+#10 DONE 0.2s
+
+#11 exporting to image
+#11 exporting layers 0.0s done
+#11 writing image sha256:d81ea3440db8272c2ca38c956b212772a25c83b79eca8f697b877a64112d1a55 done
+#11 naming to docker.io/library/amb-tracker done
+#11 DONE 0.0s

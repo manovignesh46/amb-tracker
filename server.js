@@ -3,7 +3,7 @@ const multer = require('multer');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
-const { PDFParse } = require('pdf-parse');
+const pdf = require('pdf-parse');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -29,10 +29,10 @@ const upload = multer({
 });
 
 /**
- * Parse date from DD/MM/YYYY or DD/MM/YY format
+ * Parse date from DD/MM/YYYY, DD/MM/YY, DD-MM-YYYY, or DD-MM-YY format
  */
 function parseDate(dateStr) {
-    const parts = dateStr.split('/');
+    const parts = dateStr.split(/[\/\-]/); // Split by / or -
     let day = parseInt(parts[0]);
     let month = parseInt(parts[1]) - 1; // Month is 0-indexed
     let year = parseInt(parts[2]);
@@ -51,22 +51,59 @@ function parseDate(dateStr) {
 async function parseBankStatement(pdfPath) {
     try {
         const dataBuffer = fs.readFileSync(pdfPath);
-        const parser = new PDFParse({ data: dataBuffer });
-        const data = await parser.getText();
+        const data = await pdf(dataBuffer);
         let text = data.text;
         
-        // Extract statement period (From and To dates)
-        const periodMatch = text.match(/From\s*:\s*(\d{2}\/\d{2}\/\d{4}).*?To\s*:\s*(\d{2}\/\d{2}\/\d{4})/i);
+        // Debug: Log extracted text details
+        console.log('📄 PDF Text Preview (first 1000 chars):\n', text.substring(0, 1000));
+        console.log('\n📄 Total text length:', text.length);
+        console.log('\n📋 First 50 lines of PDF:');
+        text.split('\n').slice(0, 50).forEach((line, i) => {
+            if (line.trim()) console.log(`${i}: ${line.trim()}`);
+        });
+        
+        // Try multiple date pattern formats
+        let periodMatch = text.match(/From\s*:?\s*(\d{2}[\/\-]\d{2}[\/\-]\d{4}).*?To\s*:?\s*(\d{2}[\/\-]\d{2}[\/\-]\d{4})/is);
         
         if (!periodMatch) {
-            throw new Error('Could not find statement period in PDF');
+            // Try alternative format without colons
+            periodMatch = text.match(/From\s+(\d{2}[\/\-]\d{2}[\/\-]\d{4}).*?To\s+(\d{2}[\/\-]\d{2}[\/\-]\d{4})/is);
+        }
+        
+        if (!periodMatch) {
+            // Try looking for "Period" keyword
+            periodMatch = text.match(/Period\s*:?\s*(\d{2}[\/\-]\d{2}[\/\-]\d{4})\s+to\s+(\d{2}[\/\-]\d{2}[\/\-]\d{4})/is);
+        }
+        
+        if (!periodMatch) {
+            // Try Statement Period format
+            periodMatch = text.match(/Statement\s+Period\s*:?\s*(\d{2}[\/\-]\d{2}[\/\-]\d{4})\s+to\s+(\d{2}[\/\-]\d{2}[\/\-]\d{4})/is);
+        }
+        
+        if (!periodMatch) {
+            console.log('❌ Could not find statement period. Trying to extract dates from anywhere in document...');
+            // Last resort: find ANY two dates in DD/MM/YYYY format
+            const allDates = text.match(/\d{2}[\/\-]\d{2}[\/\-]\d{4}/g);
+            if (allDates && allDates.length >= 2) {
+                console.log(`� Found ${allDates.length} dates in PDF, using first and last as period`);
+                periodMatch = [null, allDates[0], allDates[allDates.length - 1]];
+            }
+        }
+        
+        if (!periodMatch) {
+            console.log('❌ Could not find any valid dates in PDF');
+            throw new Error('Could not find statement period in PDF. Please ensure this is a valid HDFC bank statement.');
         }
         
         const fromDate = parseDate(periodMatch[1]);
         const toDate = parseDate(periodMatch[2]);
         
+        console.log(`📅 Statement Period: ${periodMatch[1]} to ${periodMatch[2]}`);
+        
         const transactions = [];
         const lines = text.split('\n');
+        
+        console.log(`📝 Processing ${lines.length} lines...`);
         
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i].trim();
@@ -79,7 +116,9 @@ async function parseBankStatement(pdfPath) {
                 continue;
             }
             
-            const dateMatch = line.match(/^(\d{2}\/\d{2}\/\d{2,4})\s+/);
+            // Match date at start of line - HDFC format has NO SPACE after date
+            // Format: DD/MM/YYTRANSACTION... or DD/MM/YY TRANSACTION...
+            const dateMatch = line.match(/^(\d{2}[\/\-]\d{2}[\/\-]\d{2,4})/);
             
             if (dateMatch) {
                 const dateStr = dateMatch[1];
@@ -87,27 +126,32 @@ async function parseBankStatement(pdfPath) {
                 
                 let combinedText = line;
                 
+                // Combine multi-line transactions
                 for (let j = i + 1; j < Math.min(i + 5, lines.length); j++) {
                     const nextLine = lines[j].trim();
                     
-                    if (nextLine.match(/^\d{2}\/\d{2}\/\d{2,4}\s+/) || nextLine.includes('STATEMENT SUMMARY')) {
+                    if (nextLine.match(/^\d{2}[\/\-]\d{2}[\/\-]\d{2,4}/) || nextLine.includes('STATEMENT SUMMARY')) {
                         break;
                     }
                     
                     combinedText += ' ' + nextLine;
                     
-                    if (nextLine.match(/\d{10,}\s+\d{2}\/\d{2}\/\d{2,4}\s+[\d,\.]+/)) {
+                    // Stop when we find a line with closing balance pattern
+                    if (nextLine.match(/\d{1,3}(?:,\d{3})*\.\d{2}$/)) {
                         break;
                     }
                 }
                 
-                // Extract only properly formatted amounts (with optional commas and .00)
-                // This avoids matching parts of reference numbers
-                const allNumbers = combinedText.match(/(?<!\d)\d{1,3}(?:,\d{3})*\.\d{2}(?!\d)/g);
+                // Extract closing balance - it's the LAST decimal number on the line
+                // Format: ...10.0010.00 or ...7,770.00231.00
+                const allNumbers = combinedText.match(/\d{1,3}(?:,\d{3})*\.\d{2}/g);
                 
                 if (allNumbers && allNumbers.length > 0) {
+                    // The last number is always the closing balance
                     const closingBalanceStr = allNumbers[allNumbers.length - 1];
                     const closingBalance = parseFloat(closingBalanceStr.replace(/,/g, ''));
+                    
+                    console.log(`  Found: ${dateStr} -> Balance: ${closingBalance}`);
                     
                     if (!isNaN(closingBalance) && closingBalance >= 0) {
                         transactions.push({
@@ -119,8 +163,9 @@ async function parseBankStatement(pdfPath) {
             }
         }
         
+        console.log(`✅ Found ${transactions.length} raw transactions`);
+        
         // Group by date - keep the LAST closing balance per date (end of day)
-        // This represents the final balance after all transactions that day
         const dateMap = new Map();
         
         for (const txn of transactions) {
@@ -129,8 +174,6 @@ async function parseBankStatement(pdfPath) {
             if (!dateMap.has(dateKey)) {
                 dateMap.set(dateKey, txn);
             } else {
-                // Always keep the latest transaction (last one wins)
-                // Since we process in order, the last one is the end-of-day balance
                 dateMap.set(dateKey, txn);
             }
         }
@@ -139,7 +182,14 @@ async function parseBankStatement(pdfPath) {
             .map(t => ({ date: t.date, closingBalance: t.closingBalance }))
             .sort((a, b) => a.date - b.date);
         
+        console.log(`✅ After grouping by date: ${uniqueTransactions.length} unique dates`);
+        
         if (uniqueTransactions.length === 0) {
+            console.log('❌ No transactions found!');
+            console.log('📋 Showing first 50 lines of PDF for debugging:');
+            lines.slice(0, 50).forEach((line, i) => {
+                if (line.trim()) console.log(`${i}: ${line}`);
+            });
             throw new Error('No transactions found in the PDF. Please check if the PDF format is correct.');
         }
         
@@ -149,6 +199,7 @@ async function parseBankStatement(pdfPath) {
             transactions: uniqueTransactions
         };
     } catch (error) {
+        console.error('❌ Parse error:', error);
         throw new Error(`Failed to parse PDF: ${error.message}`);
     }
 }

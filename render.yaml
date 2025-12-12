@@ -1,11 +1,9 @@
 services:
   - type: web
     name: amb-tracker
-    env: node
+    env: docker
     plan: free
-    buildCommand: npm install
-    startCommand: npm start
     healthCheckPath: /health
     envVars:
-      - key: NODE_VERSION
-        value: 18.18.0
+      - key: PORT
+        value: 10000

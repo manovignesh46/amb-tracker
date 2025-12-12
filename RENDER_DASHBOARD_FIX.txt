@@ -1,0 +1,107 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                 🔧 RENDER DEPLOYMENT FIX                         ║
+║                    (FOLLOW THESE STEPS)                          ║
+╚══════════════════════════════════════════════════════════════════╝
+
+PROBLEM: Your app keeps exiting with "Application exited early"
+
+WHY: Render is running `node index.js` (CLI tool that needs a file path)
+     Instead of `npm start` (web server that runs on a port)
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃  SOLUTION: Change the Start Command in Render Dashboard      ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+STEP 1: Go to Render Dashboard
+   → https://dashboard.render.com
+
+STEP 2: Click on your service
+   → Find "amb-tracker" in your services list
+   → Click on it
+
+STEP 3: Go to Settings
+   → Click the "Settings" tab at the top
+
+STEP 4: Find "Build & Deploy" section
+   → Scroll down until you see "Build & Deploy"
+   → Look for "Start Command" field
+
+STEP 5: Change the Start Command
+   
+   Current value (WRONG):
+   ┌────────────────────────────────┐
+   │ node index.js                  │  ❌ This is the CLI tool
+   └────────────────────────────────┘
+   
+   Change to (CORRECT):
+   ┌────────────────────────────────┐
+   │ npm start                      │  ✅ This runs the web server
+   └────────────────────────────────┘
+
+STEP 6: Save Changes
+   → Click "Save Changes" button at the bottom
+   → Render will automatically redeploy
+
+STEP 7: Wait for deployment (2-3 minutes)
+   → Watch the logs in the "Logs" tab
+   → Look for these SUCCESS messages:
+
+   ✅ ==> Running 'npm start'
+   ✅ 🚀 AMB Tracker Server is running!
+   ✅ 📊 Server listening on port 10000
+
+   NOT this ERROR:
+   ❌ ==> Running 'node index.js'
+   ❌ ==> Application exited early
+
+STEP 8: Test Your App
+   → Click "Your Service URL" at the top of dashboard
+   → You should see the AMB Tracker upload page
+   → Try uploading your HDFC PDF statement
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃  VERIFICATION CHECKLIST                                       ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+□ Start Command changed to "npm start"
+□ Saved changes in dashboard
+□ Deployment successful (no "exited early" error)
+□ Logs show "Server is running!"
+□ Can access the web interface
+□ Can upload PDF and see results
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃  TECHNICAL EXPLANATION                                        ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+Your project has TWO entry points:
+
+1. index.js (CLI Tool)
+   - Runs on command line
+   - Requires: node index.js <pdf-file-path>
+   - Used for: Local testing
+   - On Render: Exits immediately (no file path provided)
+
+2. server.js (Web Server)  
+   - Runs Express.js web server
+   - Started by: npm start → node server.js
+   - Listens on: PORT environment variable
+   - On Render: Stays running, serves web app
+
+The dashboard was configured to run #1 instead of #2.
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃  NEED MORE HELP?                                              ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+See these detailed guides in your repository:
+• QUICK_FIX.md - 60-second fix
+• RENDER_FIX.md - Two methods to fix  
+• RENDER_DEPLOY_GUIDE.md - Complete troubleshooting
+
+═══════════════════════════════════════════════════════════════════
+
+All changes have been pushed to GitHub.
+Your code is ready - just update the Start Command in Render!
+
+═══════════════════════════════════════════════════════════════════
