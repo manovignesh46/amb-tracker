@@ -168,3 +168,81 @@ This tool is for informational purposes only. Always verify calculations with yo
 ---
 
 **Made with ❤️ to help track AMB easily!**
+
+## 🌐 Web Interface & Vercel Deployment
+
+### Web Application
+
+This project now includes a beautiful web interface with drag-and-drop PDF upload!
+
+**Features:**
+- 🎨 Modern, responsive UI
+- 📱 Mobile-friendly design
+- 🖱️ Drag & drop PDF upload
+- 📊 Visual AMB status indicators
+- 📈 Transaction history table
+- ✅ Real-time calculations
+
+### Local Web Server
+
+Run the web interface locally:
+
+```bash
+npm start
+```
+
+Visit `http://localhost:3000`
+
+### Deploy to Vercel
+
+#### Quick Deploy with Vercel Button
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/YOUR_USERNAME/amb-tracker)
+
+#### Manual Deployment
+
+1. **Install Vercel CLI:**
+   ```bash
+   npm install -g vercel
+   ```
+
+2. **Login to Vercel:**
+   ```bash
+   vercel login
+   ```
+
+3. **Deploy (preview):**
+   ```bash
+   vercel
+   ```
+
+4. **Deploy to production:**
+   ```bash
+   vercel --prod
+   ```
+
+Your app will be live at `https://your-project.vercel.app`!
+
+### Project Structure
+
+```
+amb-tracker/
+├── api/
+│   └── analyze.js          # Serverless function (Vercel)
+├── public/
+│   ├── style.css          # Styles
+│   └── script.js          # Client-side logic
+├── index.html             # Main page
+├── index.js               # CLI tool
+├── server.js              # Local server (dev only)
+├── vercel.json            # Vercel config
+└── package.json           # Dependencies
+```
+
+### How Vercel Deployment Works
+
+- `index.html` is served as the homepage
+- `api/analyze.js` handles PDF uploads as a serverless function
+- Static files (CSS, JS) are served from the `public/` folder
+- No server management needed - fully serverless!
+
