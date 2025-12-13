@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HDFC AMB Tracker - Track Your Average Monthly Balance</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏦 HDFC Bank AMB Tracker</h1>
+            <p class="subtitle">Track your Average Monthly Balance easily</p>
+        </header>
+
+        <main>
+            <!-- Upload Section -->
+            <section class="upload-section" id="uploadSection">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>📄 Upload Bank Statement</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-icon">📁</div>
+                            <h3>Drag & Drop PDF Here</h3>
+                            <p>or</p>
+                            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                                Choose File
+                            </button>
+                            <input type="file" id="fileInput" accept="application/pdf" hidden>
+                            <p class="upload-note">Only PDF files are supported (Max 10MB)</p>
+                        </div>
+
+                        <div class="target-amb-section">
+                            <label for="targetAMB">Target AMB (₹):</label>
+                            <input type="number" id="targetAMB" value="5000" min="0" step="100">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Loading Section -->
+            <section class="loading-section hidden" id="loadingSection">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="spinner"></div>
+                        <h3>Analyzing your statement...</h3>
+                        <p>Please wait while we process your PDF</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section hidden" id="resultsSection">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>📊 AMB Analysis Results</h2>
+                        <button class="btn btn-secondary" onclick="resetApp()">Upload Another</button>
+                    </div>
+                    <div class="card-body">
+                        <!-- Status Banner -->
+                        <div class="status-banner" id="statusBanner">
+                            <div class="status-icon" id="statusIcon"></div>
+                            <div class="status-text" id="statusText"></div>
+                        </div>
+
+                        <!-- Summary Cards -->
+                        <div class="summary-grid">
+                            <div class="summary-card">
+                                <div class="summary-label">Statement Period</div>
+                                <div class="summary-value" id="statementPeriod">-</div>
+                            </div>
+                            <div class="summary-card">
+                                <div class="summary-label">Days Elapsed</div>
+                                <div class="summary-value" id="daysElapsed">-</div>
+                            </div>
+                            <div class="summary-card">
+                                <div class="summary-label">Remaining Days</div>
+                                <div class="summary-value" id="remainingDays">-</div>
+                            </div>
+                            <div class="summary-card">
+                                <div class="summary-label">Total Days</div>
+                                <div class="summary-value" id="totalDays">-</div>
+                            </div>
+                        </div>
+
+                        <!-- Current Status -->
+                        <div class="section-title">Current Status</div>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">💰 Current Balance:</span>
+                                <span class="info-value" id="currentBalance">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">📈 Current AMB:</span>
+                                <span class="info-value" id="currentAMB">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">🎯 Target AMB:</span>
+                                <span class="info-value" id="targetAMBDisplay">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Calculations -->
+                        <div class="section-title">Calculations</div>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Sum of Daily Balances:</span>
+                                <span class="info-value" id="sumDailyBalances">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Required Total Sum:</span>
+                                <span class="info-value" id="requiredTotalSum">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Remaining Sum Needed:</span>
+                                <span class="info-value" id="remainingSumNeeded">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Required Action -->
+                        <div class="section-title">Required Action</div>
+                        <div class="action-box" id="actionBox">
+                            <div class="action-content" id="actionContent"></div>
+                        </div>
+
+                        <!-- Transactions Table -->
+                        <div class="section-title">Transaction History</div>
+                        <div class="table-container">
+                            <table class="transactions-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Closing Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionsBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Error Section -->
+            <section class="error-section hidden" id="errorSection">
+                <div class="card error-card">
+                    <div class="card-body text-center">
+                        <div class="error-icon">❌</div>
+                        <h3>Error</h3>
+                        <p id="errorMessage">Something went wrong</p>
+                        <button class="btn btn-primary" onclick="resetApp()">Try Again</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Made with ❤️ for easy AMB tracking | HDFC Bank Statement Analyzer</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

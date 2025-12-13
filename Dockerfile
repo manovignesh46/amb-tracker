@@ -1,4 +1,4 @@
-# Use official Node.js 20 LTS Debian slim image (pdf-parse 2.4.5+ requires Node 20+)
+# Use official Node.js 20 LTS Debian slim image
 FROM node:20-slim
 
 # Set working directory
@@ -7,11 +7,14 @@ WORKDIR /app
 # Copy package files first (for better layer caching)
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install ALL dependencies (including devDependencies for building React)
+RUN npm ci
 
 # Copy application files
 COPY . .
+
+# Build the React app
+RUN npm run build
 
 # Create uploads directory
 RUN mkdir -p uploads

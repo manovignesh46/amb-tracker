@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "description": "HDFC Bank Average Monthly Balance (AMB) Tracker - Calculate and track your AMB requirements",
   "main": "server.js",
+  "type": "module",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "start": "node server.js",
     "cli": "node index.js",
     "test": "node index.js ./sample-statement.pdf"
@@ -24,6 +28,16 @@
     "express": "^4.18.2",
     "formidable": "^3.5.4",
     "multer": "^1.4.5-lts.1",
-    "pdf-parse": "^1.1.1"
+    "pdf-parse": "^1.1.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@vitejs/plugin-react": "^5.1.2",
+    "autoprefixer": "^10.4.22",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18",
+    "vite": "^7.2.7"
   }
 }
