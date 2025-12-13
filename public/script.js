@@ -1,6 +1,7 @@
 // DOM Elements
 const uploadArea = document.getElementById('uploadArea');
 const fileInput = document.getElementById('fileInput');
+const chooseFileBtn = document.getElementById('chooseFileBtn');
 const targetAMBInput = document.getElementById('targetAMB');
 const uploadSection = document.getElementById('uploadSection');
 const loadingSection = document.getElementById('loadingSection');
@@ -9,7 +10,12 @@ const errorSection = document.getElementById('errorSection');
 const errorMessage = document.getElementById('errorMessage');
 
 // Event Listeners
-uploadArea.addEventListener('click', () => fileInput.click());
+// Only trigger file input from the button, not the entire upload area
+chooseFileBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // Prevent event bubbling
+    fileInput.click();
+});
+
 fileInput.addEventListener('change', handleFileSelect);
 
 // Drag and Drop
